@@ -1,0 +1,23 @@
+{
+  "name": "rest-init",
+  "version": "0.0.3",
+  "description": "A light-weight CLI Tool for creating basic CRUD operations of REST API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "preferGlobal": true,
+  "bin": "./command.js",
+  "repository" :{ 
+    "type" : "git",
+    "url" : "https://github.com/harshtomar6/rest-init"
+  },
+  "author": "harsh tomar",
+  "license": "ISC",
+  "keywords": [
+    "rest", "rest-api", "create rest api", "node.js", "express.js"
+  ],
+  "dependencies": {
+    "commander": "^2.15.1"
+  }
+}
