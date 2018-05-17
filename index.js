@@ -57,8 +57,6 @@ async function addResource(){
   process.exit(0);
 }
 
-addResource();
-
 module.exports = {
   mainFunc,
   addResource
