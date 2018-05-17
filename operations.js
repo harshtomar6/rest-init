@@ -165,7 +165,7 @@ const editServerJS = resources => {
     let serverjs = fs.readFileSync('server.js').toString();
     let depen = serverjs.substring(0, serverjs.indexOf('// Load dotenv')-1);
     for(var i=0;i<resources.length;i++)
-      depen += `const ${resources[i]}Route = require('./api/route/${resources[i]}Route');
+      depen += `const ${resources[i]}Route = require('./api/routes/${resources[i]}Route');
 `
     let next = '\n'+serverjs.substring(serverjs.indexOf('// Load dotenv'), serverjs.indexOf('// Use Routes'));
     

@@ -5,7 +5,7 @@ const program = require('commander');
 const { mainFunc, addResource } = require('./index');
 
 program
-  .version('0.0.5')
+  .version('0.0.6')
   .description(' A light-weight CLI Tool for creating basic CRUD operations of REST API')
 
 program

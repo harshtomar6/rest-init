@@ -1,6 +1,6 @@
 {
   "name": "rest-init",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A light-weight CLI Tool for creating basic CRUD operations of REST API",
   "main": "index.js",
   "scripts": {
