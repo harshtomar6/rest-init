@@ -278,5 +278,6 @@ module.exports = {
   routesTemplate,
   controllerTemplate,
   schemaTemplate,
-  homeRouteTemplate
+  homeRouteTemplate,
+  capitalizeFirst
 }

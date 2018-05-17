@@ -45,6 +45,19 @@ After Creating Rest Api -
 1. Define Your Database URI in .env file
 2. Define Your Schema in api/models/schema.js
 
+**To Add new Resources to existing REST API**
+```
+rest-init resource
+```
+
+Enter the resources that you want to add and the controllers and routes for new resources will be created in respective directories.
+If api directory is not found then it will create api directory.
+
+**To Get help about this CLI**
+```
+rest-init --help
+```
+
 More Features are coming soon.
 
 Happy Coding..!!

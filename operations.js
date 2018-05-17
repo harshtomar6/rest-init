@@ -40,25 +40,39 @@ const createServerjs = (appName, resources) => {
   }
 }
 
-const createApiDirectories = (appName) => {
-  try{
-    fs.mkdirSync(DIR_NAME+appName+'/api');
-    console.log("CREATED DIRECTORY: api");
-    fs.mkdirSync(DIR_NAME+appName+'/api/routes');
-    console.log("CREATED DIRECTORY: routes");
-    fs.mkdirSync(DIR_NAME+appName+'/api/controllers');
-    console.log("CREATED DIRECTORY: controllers");
-    fs.mkdirSync(DIR_NAME+appName+'/api/models');
-    console.log("CREATED DIRECTORY: models");
-  }catch(err){
-    throw new Error(err);
-  }
+const createApiDirectories = (appName, first=true) => {
+  if(first)
+    try{
+      fs.mkdirSync(DIR_NAME+appName+'/api');
+      console.log("CREATED DIRECTORY: api");
+      fs.mkdirSync(DIR_NAME+appName+'/api/routes');
+      console.log("CREATED DIRECTORY: routes");
+      fs.mkdirSync(DIR_NAME+appName+'/api/controllers');
+      console.log("CREATED DIRECTORY: controllers");
+      fs.mkdirSync(DIR_NAME+appName+'/api/models');
+      console.log("CREATED DIRECTORY: models");
+    }catch(err){
+      throw new Error(err);
+    }
+  else
+    try{
+      fs.mkdirSync('api');
+      console.log("CREATED DIRECTORY: api");
+      fs.mkdirSync('api/routes');
+      console.log("CREATED DIRECTORY: routes");
+      fs.mkdirSync('api/controllers');
+      console.log("CREATED DIRECTORY: controllers");
+      fs.mkdirSync('api/models');
+      console.log("CREATED DIRECTORY: models");
+    }catch(err){
+      throw new Error(err);
+    }
 }
 
-const createControllers = (appName, resources) => {
+const createControllers = (appName, resources, first=true) => {
   try{
     for(var i=0; i<resources.length;i++){
-      fs.writeFileSync(`${DIR_NAME}${appName}/api/controllers/${resources[i]}Controller.js`,
+      fs.writeFileSync(`${first? DIR_NAME+appName+'/': ''}api/controllers/${resources[i]}Controller.js`,
         template.controllerTemplate(resources[i]));
       console.log(`WRITTEN ${resources[i]}Controller.js`);
     }
@@ -67,13 +81,15 @@ const createControllers = (appName, resources) => {
   }
 }
 
-const createRoutes = (appName, resources) => {
+const createRoutes = (appName, resources, first=true) => {
   try{
-    fs.writeFileSync(`${DIR_NAME}${appName}/api/routes/homeRoute.js`,
-        template.homeRouteTemplate());
-    console.log(`WRITTEN homeRoute.js`);
+    if(first){
+      fs.writeFileSync(`${DIR_NAME}${appName}/api/routes/homeRoute.js`,
+          template.homeRouteTemplate());
+      console.log(`WRITTEN homeRoute.js`);
+    }
     for(var i=0; i<resources.length;i++){
-      fs.writeFileSync(`${DIR_NAME}${appName}/api/routes/${resources[i]}Route.js`,
+      fs.writeFileSync(`${first? DIR_NAME+appName+'/': ''}api/routes/${resources[i]}Route.js`,
         template.routesTemplate(resources[i]));
       console.log(`WRITTEN ${resources[i]}Route.js`);
     }
@@ -82,9 +98,9 @@ const createRoutes = (appName, resources) => {
   }
 }
 
-const createModel = (appName, resources) => {
+const createModel = (appName, resources, first=true) => {
   try{
-    fs.writeFileSync(`${DIR_NAME}${appName}/api/models/schema.js`,
+    fs.writeFileSync(`${first? DIR_NAME+appName+'/': ''}api/models/schema.js`,
       template.schemaTemplate(resources));
     console.log(`WRITTEN schema.js`);
   }catch(err){
@@ -115,6 +131,57 @@ const createDotGitIgnore = (appName) => {
   }
 }
 
+const addSchema = (resources) => {
+  try{
+    let schema = fs.readFileSync('api/models/schema.js').toString();
+    let schemaarr = schema.substr(0, schema.indexOf('module')-1);
+    for(let i=0;i<resources.length;i++)
+      schemaarr += `const ${resources[i]}Schema = mongoose.Schema({
+
+});
+
+`;
+    let moduleExports = schema.substr(schema.indexOf('module.exports')+"module.exports".length);
+    moduleExports = moduleExports.substr(moduleExports.indexOf('{')+2, moduleExports.lastIndexOf('),')-1);
+    
+    for(let i=0;i<resources.length;i++)
+      moduleExports += `  ${template.capitalizeFirst(resources[i])} : mongoose.model('${template.capitalizeFirst(resources[i])}', ${resources[i]}Schema),
+`
+
+    let data = schemaarr + `
+module.exports = {
+  ${moduleExports}
+}`
+    fs.writeFileSync('api/models/schema.js', data);
+    console.log('REWRITTEN schema.js');
+  }catch(err){
+    throw new Error(err);
+  }
+
+}
+
+const editServerJS = resources => {
+  try{
+    let serverjs = fs.readFileSync('server.js').toString();
+    let depen = serverjs.substring(0, serverjs.indexOf('// Load dotenv')-1);
+    for(var i=0;i<resources.length;i++)
+      depen += `const ${resources[i]}Route = require('./api/route/${resources[i]}Route');
+`
+    let next = '\n'+serverjs.substring(serverjs.indexOf('// Load dotenv'), serverjs.indexOf('// Use Routes'));
+    
+    let useRoutes = serverjs.substring(serverjs.indexOf('// Use Routes'), serverjs.indexOf('// Listen for')-1);
+    for(let i=0;i<resources.length;i++)
+      useRoutes += `app.use('/${resources[i]}', ${resources[i]}Route);
+`
+    
+    let next2 = '\n'+serverjs.substring(serverjs.indexOf('// Listen for'));
+    fs.writeFileSync('server.js', depen+next+useRoutes+next2);
+    console.log('REWRITTEN server.js');
+  }catch(err){
+    throw new Error(err);
+  }
+}
+
 module.exports = {
   createAppDirectory,
   createPackageJson,
@@ -125,5 +192,7 @@ module.exports = {
   createDotGitIgnore,
   createModel,
   createControllers,
-  createRoutes
+  createRoutes,
+  addSchema,
+  editServerJS
 }

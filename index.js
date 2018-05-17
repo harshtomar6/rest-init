@@ -30,6 +30,36 @@ async function mainFunc(){
     process.exit(0);
   });
 }
+
+async function addResource(){
+  if(!fs.existsSync('package.json')){
+    console.log('package.json not found\n\nYou should be inside a node.js project to add a new resource\n\n');
+    process.exit(0);
+  }
+
+  let resourceName = await input('Resource Names, [seperated by space]: ');
+  let resources = resourceName.split(' ');
+  let appName = JSON.parse(fs.readFileSync('package.json').toString()).name;
+
+  if(!fs.existsSync('api'))
+    op.createApiDirectories(appName, false);
+  
+  op.createControllers(appName, resources, false);
+  op.createRoutes(appName, resources, false);
+  
+  if(!fs.existsSync('api/models/schema.js'))
+    op.createModel(appName, resources, false);
+  else
+    op.addSchema(resources);
+  
+  op.editServerJS(resources);
+  console.log('\n\nNEW RESOURCES ADDED.\nNext Steps: \n1. Define Schema for new resources in api/models/schema.js');
+  process.exit(0);
+}
+
+addResource();
+
 module.exports = {
-  mainFunc
+  mainFunc,
+  addResource
 }
